@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frozen Mart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-flake" viewBox="0 0 24 24"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5 12 18l3 2.5M3 9.5l3.8.9L5.6 14M21 14.5l-3.8-.9 1.2-3.6M3 14.5l3.8-.9L5.6 10M21 9.5l-3.8.9 1.2 3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20" r="1.3" fill="currentColor"/><circle cx="17.5" cy="20" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="17.5" cy="17.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4.2 3 7.6 7 9 4-1.4 7-4.8 7-9V6l-7-3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 10h8M8 13h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></symbol>
+  </svg>
+
+  <div class="promo-bar">
+    <svg class="ic"><use href="#i-truck"/></svg>
+    <span><strong>Free delivery</strong> on every order. No minimum spend.</span>
+  </div>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-logo"><svg><use href="#i-flake"/></svg></span>
+        <span class="brand-text">
+          <span class="brand-name" id="shopName">Frozen Mart</span>
+          <span class="brand-tag" id="shopTagline"></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="#shop">Shop</a>
+        <a href="#how">How it works</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button class="cart-btn" id="openCart" aria-label="Open cart">
+        <svg class="ic"><use href="#i-cart"/></svg>
+        <span class="cart-label">Cart</span>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span> Free delivery on every order</span>
+        <h1>Quality frozen food, <em>delivered free</em> to your door.</h1>
+        <p id="heroText">Chicken, meat, fish and sides, kept frozen and ready to cook. Add what you need, send your order on WhatsApp, and we'll handle the rest.</p>
+        <div class="search">
+          <svg class="ic search-icon"><use href="#i-search"/></svg>
+          <input id="search" type="search" placeholder="Search chicken, fish, fries…" aria-label="Search products">
+          <a class="search-btn" href="#shop">Browse</a>
+        </div>
+      </div>
+
+      <aside class="hero-card" aria-label="Why shop with us">
+        <div class="hc-row">
+          <span class="hc-ic"><svg><use href="#i-truck"/></svg></span>
+          <div><strong>Free delivery</strong><span>On every order, no minimum</span></div>
+        </div>
+        <div class="hc-row">
+          <span class="hc-ic"><svg><use href="#i-flake"/></svg></span>
+          <div><strong>Always frozen</strong><span>Stored at −18°C until it leaves us</span></div>
+        </div>
+        <div class="hc-row">
+          <span class="hc-ic"><svg><use href="#i-chat"/></svg></span>
+          <div><strong>Order on WhatsApp</strong><span>We confirm before you pay</span></div>
+        </div>
+        <div class="hc-foot"><svg class="ic"><use href="#i-clock"/></svg> Open Mon–Sat, 8am–8pm</div>
+      </aside>
+    </div>
+  </section>
+
+  <main class="wrap main" id="shop">
+    <div class="section-head">
+      <div>
+        <span class="kicker">Our freezer</span>
+        <h2>Shop by category</h2>
+      </div>
+      <label class="toggle"><input type="checkbox" id="inStockOnly"><span class="switch"></span> In stock only</label>
+    </div>
+    <nav class="chips" id="categories" aria-label="Categories"></nav>
+    <div class="toolbar"><span id="resultCount"></span></div>
+    <section class="grid" id="products"></section>
+    <p class="empty" id="emptyMsg" hidden>No products match your search.</p>
+  </main>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <span class="kicker">Simple ordering</span>
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-ic"><svg><use href="#i-bag"/></svg></span>
+          <h3>Pick your items</h3>
+          <p>Browse the freezer and add what you need to your cart.</p>
+        </li>
+        <li>
+          <span class="step-ic"><svg><use href="#i-wa"/></svg></span>
+          <h3>Send on WhatsApp</h3>
+          <p>Your order goes to us as a receipt. We confirm stock and payment.</p>
+        </li>
+        <li>
+          <span class="step-ic"><svg><use href="#i-truck"/></svg></span>
+          <h3>Delivered free</h3>
+          <p>We bring it to your door, still frozen. Delivery costs nothing.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <footer class="footer" id="contact">
+    <div class="wrap footer-grid">
+      <div>
+        <div class="brand footer-brand">
+          <span class="brand-logo"><svg><use href="#i-flake"/></svg></span>
+          <span class="brand-name">Frozen Mart</span>
+        </div>
+        <p class="footer-about">Quality frozen food with free delivery on every order.</p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <a class="footer-wa" id="footerWa" target="_blank" rel="noopener">
+          <svg class="ic"><use href="#i-wa"/></svg> <span id="waDisplay"></span>
+        </a>
+      </div>
+      <div>
+        <h4>Opening hours</h4>
+        <p id="footerText"></p>
+      </div>
+    </div>
+    <div class="wrap footer-base">© <span id="year"></span> Frozen Mart. All rights reserved.</div>
+  </footer>
+
+  <a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>
+    <span>Chat with us</span>
+  </a>
+
+  <!-- Cart drawer -->
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h2>Your cart</h2>
+      <button class="icon-btn" id="closeCart" aria-label="Close cart">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="free-banner" id="freeBanner" hidden><svg class="ic"><use href="#i-truck"/></svg> <span>This order qualifies for <strong>free delivery</strong></span></div>
+      <ul class="cart-list" id="cartList"></ul>
+      <div class="empty cart-empty" id="cartEmpty">
+        <div class="empty-icon"><svg><use href="#i-cart"/></svg></div>
+        <strong>Your cart is empty</strong>
+        <span>Add something from the freezer to get started.</span>
+      </div>
+
+      <form id="checkout" class="checkout" hidden>
+        <h3>Your details</h3>
+        <label>Full name <input name="name" required autocomplete="name" placeholder="e.g. Ama Mensah"></label>
+        <label>Phone number <input name="phone" required type="tel" autocomplete="tel" placeholder="e.g. 024 000 0000"></label>
+        <fieldset class="radio-row">
+          <legend>How do you want it?</legend>
+          <label class="seg"><input type="radio" name="method" value="Delivery" checked><span><svg class="ic"><use href="#i-truck"/></svg> Delivery <small>Free</small></span></label>
+          <label class="seg"><input type="radio" name="method" value="Pickup"><span><svg class="ic"><use href="#i-bag"/></svg> Pickup</span></label>
+        </fieldset>
+        <label id="addressField">Delivery address <textarea name="address" rows="2" placeholder="House number, street, area"></textarea></label>
+        <label>Note (optional) <textarea name="note" rows="2" placeholder="e.g. call when you arrive"></textarea></label>
+
+        <div class="totals">
+          <div><span>Subtotal</span><span id="subtotal"></span></div>
+          <div id="deliveryRow"><span>Delivery</span><span id="deliveryFee" class="free-tag">FREE</span></div>
+          <div class="grand"><span>Total</span><span id="total"></span></div>
+        </div>
+        <button type="submit" class="primary">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>
+          Send order on WhatsApp
+        </button>
+        <p class="hint">Your order opens in WhatsApp so we can confirm availability and payment.</p>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Receipt (shown after an order is sent) -->
+  <div class="receipt-modal" id="receiptModal" hidden role="dialog" aria-modal="true" aria-labelledby="rcptTitle">
+    <div class="receipt-wrap">
+      <button class="icon-btn rcpt-x" id="rcptClose" aria-label="Close receipt">✕</button>
+      <div class="receipt" id="receipt">
+        <h2 class="r-shop" id="rcptTitle"><span id="rcptShop"></span></h2>
+        <div class="r-sub1" id="rcptContact"></div>
+        <div class="r-sub2">Thank you for shopping with us</div>
+
+        <div class="r-order">
+          <div class="r-order-no">Order <span id="rcptNo"></span></div>
+          <div class="r-order-meta" id="rcptDate"></div>
+        </div>
+
+        <ul class="r-items" id="rcptItems"></ul>
+
+        <div class="r-rule"></div>
+        <div class="r-row"><span>Subtotal</span><span id="rcptSubtotal"></span></div>
+        <div class="r-row"><span id="rcptDeliveryLabel">Free delivery</span><span id="rcptDelivery"></span></div>
+        <div class="r-rule"></div>
+
+        <div class="r-total"><span>Total</span><span id="rcptTotal"></span></div>
+
+        <div class="r-customer" id="rcptCustomer"></div>
+
+        <div class="r-foot">
+          <div>Stay frozen</div>
+          <div>Eat well</div>
+          <div>Cheers</div>
+        </div>
+      </div>
+      <div class="receipt-actions">
+        <button class="ghost" id="rcptPrint">Print / Save PDF</button>
+        <button class="solid" id="rcptDone">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="products.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
