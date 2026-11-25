@@ -6,7 +6,7 @@
 const SHOP = {
   name: "Frozen Mart",
   tagline: "Frozen foods • Free delivery",
-  currency: "$",              // e.g. "GH₵", "₦", "$", "£"
+  currency: "GH₵ ",             // e.g. "GH₵", "₦", "$", "£"
   whatsappNumber: "233509691257", // YOUR WhatsApp number with country code, digits only
   // Delivery is always FREE.
   lowStockAt: 5,             // show "Only X left" at or below this number
@@ -23,7 +23,7 @@ const PRODUCTS = [
   { id: "chk-whole",   name: "Whole Chicken",         category: "Chicken",    unit: "approx. 1.5 kg", price: 9.5,  stock: 24, emoji: "🐔" },
   { id: "chk-thighs",  name: "Chicken Thighs",        category: "Chicken",    unit: "1 kg pack",      price: 7.0,  stock: 30, emoji: "🍗" },
   { id: "chk-wings",   name: "Chicken Wings",         category: "Chicken",    unit: "1 kg pack",      price: 6.5,  stock: 4,  emoji: "🍗" },
-  { id: "chk-breast",  name: "Chicken Breast Fillet", category: "Chicken",    unit: "1 kg pack",      price: 8.5,  stock: 0,  emoji: "🍗" },
+  { id: "chk-breast",  name: "Chicken Breast",        category: "Chicken",    unit: "Boneless & skinless · 2 kg pack", price: 120, stock: 20, emoji: "🍗" },
 
   // Meat
   { id: "beef-mince",  name: "Beef Mince",            category: "Meat",       unit: "500 g",          price: 6.0,  stock: 15, emoji: "🥩" },
