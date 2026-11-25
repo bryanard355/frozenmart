@@ -219,6 +219,18 @@ h1, h2, h3, h4 { letter-spacing: -.02em; }
 .add:disabled { background: #d3dad6; color: #75837c; cursor: not-allowed; }
 .empty { color: var(--muted); text-align: center; padding: 32px 0; }
 
+/* Loading placeholders */
+.card.skeleton { pointer-events: none; }
+.card.skeleton .thumb, .card.skeleton i {
+  background: linear-gradient(90deg, #edf1ee 0%, #f7f9f7 50%, #edf1ee 100%); background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+.card.skeleton i { display: block; height: 12px; border-radius: 6px; margin: 6px 0; }
+.card.skeleton i:nth-child(1) { width: 40%; }
+.card.skeleton i:nth-child(2) { width: 75%; height: 16px; }
+.card.skeleton i:nth-child(3) { width: 55%; margin-top: 24px; height: 20px; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
 /* How it works */
 .how { background: #fff; border-top: 1px solid var(--line); padding: 72px 0; text-align: center; }
 .steps {

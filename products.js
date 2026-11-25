@@ -14,6 +14,9 @@ const SHOP = {
 };
 
 // stock: how many you have. Set to 0 when sold out.
+// TIP: once the admin page is set up, update stock, prices and photos there instead.
+// This file is only the starting list (and the backup if storage is unreachable).
+//
 // PHOTOS: put a picture in the "photos" folder named after the product's id, e.g.
 //   photos/chk-whole.jpg   photos/prawns.png   (jpg, jpeg, png or webp all work)
 // It shows up automatically. No photo yet? The emoji is shown instead.

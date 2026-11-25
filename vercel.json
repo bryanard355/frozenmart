@@ -1,6 +1,26 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "admin.frozenmart.bryanowusu.club" }],
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "missing": [{ "type": "host", "value": "admin.frozenmart.bryanowusu.club" }],
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/admin.html",
+      "missing": [{ "type": "host", "value": "admin.frozenmart.bryanowusu.club" }],
+      "destination": "/",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/photos/(.*)",
@@ -9,6 +29,14 @@
     {
       "source": "/(.*)\\.(js|css)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/admin(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
     }
   ]
 }

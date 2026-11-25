@@ -351,7 +351,30 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("receiptModal").hidden) closeReceipt(); });
 
   // ---------- start ----------
-  renderCategories();
-  renderProducts();
-  renderCart();
+  // Live stock comes from the admin page (/api/catalog). If it can't be reached,
+  // the shop falls back to the list in products.js.
+  async function loadLiveCatalog() {
+    if (location.protocol === "file:") return;
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000);
+      const res = await fetch("/api/catalog", { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data.products) && data.products.length) {
+        PRODUCTS.splice(0, PRODUCTS.length, ...data.products);
+      }
+    } catch (e) { /* use products.js */ }
+  }
+
+  $("products").innerHTML = Array.from({ length: 8 }, () =>
+    '<div class="card skeleton" aria-hidden="true"><div class="thumb"></div><div class="card-body"><i></i><i></i><i></i></div></div>'
+  ).join("");
+
+  loadLiveCatalog().then(() => {
+    renderCategories();
+    renderProducts();
+    renderCart();
+  });
 })();
