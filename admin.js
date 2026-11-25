@@ -25,7 +25,11 @@
     let data = {};
     try { data = await res.json(); } catch (e) {}
     if (!res.ok) {
-      const err = new Error(data.error || `Something went wrong (${res.status}).`);
+      let fallback = `Something went wrong (${res.status}).`;
+      if (res.status === 404 || res.status === 405 || res.status === 501) {
+        fallback = "This page can't save from here. Open the admin at https://admin.frozenmart.bryanowusu.club";
+      }
+      const err = new Error(data.error || fallback);
       err.status = res.status;
       throw err;
     }
