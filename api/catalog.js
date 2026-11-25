@@ -1,8 +1,17 @@
 // GET /api/catalog: the live product list for the shop (public).
-import { get } from "@vercel/blob";
+import { get, head } from "@vercel/blob";
 import { json, CATALOG_PATH } from "./_lib.js";
 
-export async function GET() {
+export async function GET(request) {
+  // Diagnostic: /api/catalog?check=1 asks storage directly (bypassing caches) whether a save exists.
+  if (new URL(request.url).searchParams.get("check") === "1") {
+    try {
+      const h = await head(CATALOG_PATH);
+      return json({ exists: true, uploadedAt: h.uploadedAt, size: h.size, cacheControl: h.cacheControl });
+    } catch (err) {
+      return json({ exists: false, reason: String((err && err.name) || "") + ": " + String((err && err.message) || err).slice(0, 160) });
+    }
+  }
   try {
     const res = await get(CATALOG_PATH, { access: "public", useCache: false });
     if (!res || res.statusCode !== 200 || !res.stream) {
