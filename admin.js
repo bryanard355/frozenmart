@@ -325,6 +325,16 @@
     }
   });
 
+  $("starterBtn").addEventListener("click", () => {
+    if (!confirm("Replace the list below with your starting products and prices (Sadia, Nat, Chicken Breast…)? Nothing changes on the shop until you press Save changes.")) return;
+    // Keep photos already uploaded for products that are still in the list.
+    const photos = Object.fromEntries(items.filter((p) => p.image).map((p) => [p.id, p.image]));
+    items = PRODUCTS.map((p) => ({ ...p, ...(photos[p.id] && !p.image ? { image: photos[p.id] } : {}) }));
+    query = ""; $("search").value = "";
+    render();
+    toast("Starting list loaded. Check stock numbers, then press Save changes.");
+  });
+
   $("discardBtn").addEventListener("click", () => {
     if (!confirm("Discard all unsaved changes?")) return;
     if (savedJson) items = JSON.parse(savedJson);

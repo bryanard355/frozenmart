@@ -153,3 +153,12 @@ body.admin .toast { bottom: 96px; }
   .a-top-actions .btn-ghost:first-child { display: none; }
 }
 body.admin .toast:not(.show) { opacity: 0; transform: translateX(-50%) translateY(140px); }
+
+/* Brand header for admin */
+.admin .brand { gap: 10px; }
+.admin-tag {
+  font-family: var(--display); font-weight: 800; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  background: var(--red); color: #fff; padding: 3px 8px; border-radius: 5px;
+}
+.a-head-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 640px) { .admin .brand-img { height: 20px; } }
