@@ -115,58 +115,6 @@ h1, h2, h3, h4 { letter-spacing: -.02em; font-family: var(--display); }
 }
 .search-btn:hover { background: var(--red-dark); }
 
-.hero-grid {
-  display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; margin-top: 48px; align-items: stretch;
-  max-width: 980px; margin-left: auto; margin-right: auto;
-}
-.menu-card {
-  position: relative; background: var(--g-800); color: #fff; border-radius: 22px;
-  padding: 98px 30px 26px; box-shadow: var(--shadow-lg);
-  background-image: radial-gradient(500px 260px at 100% 0%, rgba(255,255,255,.07), transparent 60%);
-}
-.ribbon {
-  position: absolute; top: 18px; left: -14px;
-  background: linear-gradient(180deg, #e0242b, var(--red)); color: #fff;
-  font-family: var(--display); font-weight: 900; font-size: clamp(20px, 2.6vw, 28px); letter-spacing: .01em; text-transform: uppercase;
-  padding: 10px 46px 12px 28px; border-radius: 14px 4px 4px 14px;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%);
-  box-shadow: 0 10px 20px rgba(165, 18, 24, .35);
-}
-.ribbon span { position: relative; display: inline-block; }
-.ribbon span::after {
-  content: ""; position: absolute; left: 50%; bottom: -7px; width: 64%; height: 3px; transform: translateX(-50%);
-  background: var(--gold); border-radius: 0 0 50% 50% / 0 0 100% 100%;
-}
-.ribbon::before { /* folded tail */
-  content: ""; position: absolute; left: 0; bottom: -10px; border-top: 10px solid #7d0c10; border-left: 14px solid transparent;
-}
-.menu-head {
-  display: flex; justify-content: space-between; font-family: var(--display); font-weight: 800; font-size: 15px;
-  letter-spacing: .04em; text-transform: uppercase; padding: 0 4px 12px; border-bottom: 1px solid rgba(255,255,255,.22);
-}
-.menu-list { list-style: none; margin: 0; padding: 0; }
-.menu-list li {
-  display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px;
-  padding: 11px 4px; border-bottom: 1px solid rgba(255,255,255,.14); font-family: var(--display); font-weight: 700; font-size: 16.5px;
-}
-.menu-list .tick { width: 22px; height: 22px; color: var(--gold); }
-.menu-list .tick path { stroke-width: 3.6; }
-.menu-list .mi-price { font-weight: 800; white-space: nowrap; }
-.menu-list li.is-out { opacity: .6; }
-.menu-list li.is-out .mi-price { font-size: 13px; background: rgba(255,255,255,.12); padding: 2px 8px; border-radius: 6px; }
-.menu-list li.more { display: block; border: 0; padding-top: 12px; font-size: 14px; }
-.menu-list li.more a { color: var(--gold); text-decoration: none; }
-.menu-cta {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; text-decoration: none;
-  background: var(--gold); color: var(--g-950); font-family: var(--display); font-weight: 800; font-size: 15px;
-  padding: 12px 22px; border-radius: 10px; transition: background .15s, transform .15s;
-}
-.menu-cta:hover { background: #ffc61a; transform: translateY(-1px); }
-.photo-stack { display: grid; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 14px; contain: size; /* height follows the price list */ }
-.photo-stack img {
-  width: 100%; height: 100%; min-height: 0; object-fit: cover; border-radius: 18px;
-  border: 4px solid #fff; box-shadow: var(--shadow-md);
-}
 
 /* Shop section */
 .main { padding-top: 56px; }
@@ -468,9 +416,6 @@ body.receipt-open { overflow: hidden; }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .hero-grid { grid-template-columns: 1fr; max-width: 560px; }
-  .photo-stack { grid-template-rows: none; grid-template-columns: repeat(3, 1fr); contain: none; }
-  .photo-stack img { aspect-ratio: 4 / 3; height: auto; }
   .nav { display: none; }
   .cart-btn { margin-left: auto; }
   .steps { grid-template-columns: 1fr; }
@@ -486,11 +431,6 @@ body.receipt-open { overflow: hidden; }
   .hero-sub { font-size: 15px; }
   .brand-img { height: 24px; }
   .leaf { display: none; }
-  .menu-card { padding: 86px 18px 20px; }
-  .ribbon { left: -8px; }
-  .menu-list li { font-size: 15px; padding: 10px 2px; }
-  .photo-stack { gap: 8px; }
-  .photo-stack img { border-width: 3px; border-radius: 12px; }
   .contact-pill { border-radius: 20px; padding: 14px 18px; gap: 14px; }
   .cp-divider { display: none; }
   .search-btn { display: none; }

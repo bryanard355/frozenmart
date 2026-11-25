@@ -70,22 +70,6 @@
     `<a href="tel:${escapeHtml(String(n).replace(/[^\d+]/g, ""))}">${escapeHtml(n)}</a>`
   ).join("");
 
-  // "What we sell" price list (like the flyer)
-  function shortMoney(n) {
-    n = Number(n);
-    return SHOP.currency + (Number.isInteger(n) ? n : n.toFixed(2));
-  }
-  function renderPriceList() {
-    const MAX = 8;
-    const items = PRODUCTS.slice(0, MAX);
-    $("priceList").innerHTML = items.map((p) => `
-      <li class="${p.stock <= 0 ? "is-out" : ""}">
-        <svg class="tick" aria-hidden="true"><use href="#i-check"/></svg>
-        <span class="mi-name">${escapeHtml(p.name)}</span>
-        <span class="mi-price">${p.stock <= 0 ? "Sold out" : shortMoney(p.price)}</span>
-      </li>`).join("") +
-      (PRODUCTS.length > MAX ? `<li class="more"><a href="#shop">+ ${PRODUCTS.length - MAX} more in the shop</a></li>` : "");
-  }
 
   // ---------- WhatsApp contact ----------
   const waDigits = String(SHOP.whatsappNumber).replace(/\D/g, "");
@@ -397,7 +381,6 @@
   ).join("");
 
   loadLiveCatalog().then(() => {
-    renderPriceList();
     renderCategories();
     renderProducts();
     renderCart();
