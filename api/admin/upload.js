@@ -1,7 +1,6 @@
-// POST /api/admin/upload?id=<product-id>: stores a product photo and returns its URL.
+// POST /api/admin/upload?id=<product-id>: stores a product photo and returns its link.
 // The admin page shrinks photos before sending, so they stay well under Vercel's 4.5 MB request limit.
-import { put } from "@vercel/blob";
-import { json, checkAuth, storageError } from "../_lib.js";
+import { json, checkAuth, storageError, putBlob, photoLink } from "../_lib.js";
 
 const TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -22,12 +21,11 @@ export async function POST(request) {
     .toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) || "product";
 
   try {
-    const blob = await put(`photos/${id}.${ext}`, buf, {
-      access: "public",
+    const blob = await putBlob(`photos/${id}.${ext}`, buf, {
       addRandomSuffix: true, // every upload gets a new link, so browsers never show an old photo
       contentType: type,
     });
-    return json({ url: blob.url });
+    return json({ url: photoLink(blob) });
   } catch (err) {
     return storageError(err);
   }

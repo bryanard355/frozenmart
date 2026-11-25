@@ -1,5 +1,6 @@
 // Shared helpers for the API functions. Files starting with "_" are not exposed as endpoints.
 import { createHash, timingSafeEqual } from "node:crypto";
+import { get, put } from "@vercel/blob";
 
 export const CATALOG_PATH = "catalog.json";
 
@@ -26,18 +27,71 @@ export async function checkAuth(request) {
   return null;
 }
 
-/** Turns storage errors into a message the shop owner can act on. */
+/** Turns storage errors into a message the shop owner can act on (always includes the real reason). */
 export function storageError(err) {
-  const msg = String((err && err.message) || err);
-  if (/token|store|BLOB|credentials|access denied/i.test(msg)) {
-    return json({ error: "Photo & stock storage isn't connected yet. In Vercel open your project → Storage → create a Blob store and connect it to this project, then redeploy." }, 500);
+  const msg = String((err && err.message) || err).slice(0, 300);
+  if (/No token found|BLOB_READ_WRITE_TOKEN|BLOB_STORE_ID|OIDC|unable to extract store/i.test(msg)) {
+    return json({ error: "Storage isn't connected to this project. In Vercel open frozenmart → Storage, connect your Blob store to this project, then redeploy. (" + msg + ")" }, 500);
   }
   return json({ error: "Storage error: " + msg }, 500);
+}
+
+// ---------- Blob access (works with both public and private stores) ----------
+// A Blob store is either public or private. We learn which on the first successful call.
+let accessMode = null; // "public" | "private"
+const modes = () => (accessMode ? [accessMode] : ["private", "public"]);
+
+/** Writes a blob, trying the store's access mode. Returns the put() result plus the mode used. */
+export async function putBlob(path, body, options) {
+  const errors = [];
+  for (const mode of modes()) {
+    try {
+      const res = await put(path, body, { ...options, access: mode });
+      accessMode = mode;
+      return { ...res, access: mode };
+    } catch (err) {
+      errors.push(err);
+    }
+  }
+  if (errors.length === 1) throw errors[0];
+  // Both modes failed: report both reasons so the real problem is visible.
+  throw new Error(errors.map((e, i) => `${["private", "public"][i]} → ${(e && e.message) || e}`).join(" | "));
+}
+
+/** Reads a blob. fresh=true reads the latest copy (consistent reads on private stores). Returns null if missing. */
+export async function readBlob(path, fresh) {
+  let lastErr = null;
+  const tried = modes();
+  for (const mode of tried) {
+    try {
+      const res = await get(path, { access: mode, ...(fresh ? { useCache: false } : {}) });
+      if (res && res.statusCode === 200 && res.stream) {
+        accessMode = mode;
+        return res;
+      }
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  if (lastErr && tried.length === 1) throw lastErr;
+  return null;
+}
+
+/** The link the site uses to show an uploaded photo. Private photos are served through /api/photo. */
+export function photoLink(putResult) {
+  return putResult.access === "private" ? "/api/photo?p=" + putResult.pathname : putResult.url;
+}
+/** Store pathname for a photo link (for tidying up unused photos). */
+export function photoPath(link) {
+  if (!link) return "";
+  if (link.startsWith("/api/photo?p=")) return link.slice("/api/photo?p=".length);
+  try { return decodeURIComponent(new URL(link).pathname.slice(1)); } catch { return link; }
 }
 
 const ID_RE = /^[a-z0-9-]{1,60}$/;
 const BLOB_URL_RE = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/[\w./%-]+$/i;
 const LOCAL_PHOTO_RE = /^photos\/[\w.-]+$/;
+const PRIVATE_PHOTO_RE = /^\/api\/photo\?p=photos\/[\w.-]+$/;
 
 const text = (v, max) => Array.from(String(v ?? "").trim()).slice(0, max).join("");
 
@@ -59,7 +113,7 @@ export function cleanProducts(input) {
     const stock = Math.floor(Number(p.stock));
     if (!Number.isFinite(stock) || stock < 0 || stock > 1e7) throw new Error(`${label} has an invalid stock number.`);
     const image = text(p.image, 600);
-    if (image && !BLOB_URL_RE.test(image) && !LOCAL_PHOTO_RE.test(image)) throw new Error(`${label} has an invalid photo link.`);
+    if (image && !BLOB_URL_RE.test(image) && !LOCAL_PHOTO_RE.test(image) && !PRIVATE_PHOTO_RE.test(image)) throw new Error(`${label} has an invalid photo link.`);
     const out = {
       id,
       name,

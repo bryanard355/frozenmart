@@ -1,6 +1,6 @@
 // POST /api/admin/save: replaces the live product list.
-import { put, list, del } from "@vercel/blob";
-import { json, checkAuth, storageError, cleanProducts, CATALOG_PATH } from "../_lib.js";
+import { list, del } from "@vercel/blob";
+import { json, checkAuth, storageError, cleanProducts, putBlob, photoPath, CATALOG_PATH } from "../_lib.js";
 
 export async function POST(request) {
   const denied = await checkAuth(request);
@@ -22,8 +22,7 @@ export async function POST(request) {
 
   const catalog = { updatedAt: new Date().toISOString(), products };
   try {
-    await put(CATALOG_PATH, JSON.stringify(catalog), {
-      access: "public",
+    await putBlob(CATALOG_PATH, JSON.stringify(catalog), {
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: "application/json",
@@ -36,11 +35,11 @@ export async function POST(request) {
   // Tidy up: delete uploaded photos no product uses any more (older than 1 hour, so
   // photos uploaded but not yet saved are never removed).
   try {
-    const used = new Set(products.map((p) => p.image).filter(Boolean));
+    const used = new Set(products.map((p) => photoPath(p.image)).filter(Boolean));
     const { blobs } = await list({ prefix: "photos/", limit: 1000 });
     const hourAgo = Date.now() - 60 * 60 * 1000;
     const unused = blobs
-      .filter((b) => !used.has(b.url) && new Date(b.uploadedAt).getTime() < hourAgo)
+      .filter((b) => !used.has(b.pathname) && new Date(b.uploadedAt).getTime() < hourAgo)
       .map((b) => b.url);
     if (unused.length) await del(unused);
   } catch {
