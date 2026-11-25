@@ -31,8 +31,10 @@
   // Product photo: uses p.image if set, otherwise looks for photos/<id>.jpg / .jpeg / .png / .webp.
   // If no photo is found, the emoji behind it shows instead.
   const PHOTO_EXTS = ["jpg", "jpeg", "png", "webp"];
+  // Bump this when photos change so browsers fetch fresh copies instead of old saved ones.
+  const PHOTO_V = "?v=2";
   function photoHtml(p) {
-    const first = p.image ? p.image : `photos/${p.id}.${PHOTO_EXTS[0]}`;
+    const first = p.image ? p.image : `photos/${p.id}.${PHOTO_EXTS[0]}${PHOTO_V}`;
     const tries = p.image ? "" : PHOTO_EXTS.slice(1).join(",");
     return `<span class="ph-emoji" aria-hidden="true">${p.emoji || "🧊"}</span>` +
       `<img class="ph-img" src="${escapeHtml(first)}" alt="${escapeHtml(p.name)}" loading="lazy" ` +
@@ -42,7 +44,7 @@
     const tries = (img.dataset.tries || "").split(",").filter(Boolean);
     if (!tries.length) { img.remove(); return; }
     img.dataset.tries = tries.slice(1).join(",");
-    img.src = `photos/${img.dataset.id}.${tries[0]}`;
+    img.src = `photos/${img.dataset.id}.${tries[0]}${PHOTO_V}`;
   };
 
   let toastTimer;
