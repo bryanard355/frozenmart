@@ -182,3 +182,11 @@ body.admin .toast:not(.show) { opacity: 0; transform: translateX(-50%) translate
 .a-mini-add:hover { border-color: var(--g-600); background: var(--g-50); }
 .a-photo-hint { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.3; }
 @media (max-width: 640px) { .a-photo { max-width: 96px; } }
+
+/* "Add from your list" picker */
+.a-pick {
+  font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--red);
+  border: 0; border-radius: 9px; padding: 9px 12px; cursor: pointer; max-width: 100%;
+}
+.a-pick:hover { background: var(--red-dark); }
+.a-pick option { color: var(--ink); background: #fff; font-weight: 500; }

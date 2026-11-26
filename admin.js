@@ -182,8 +182,23 @@
       .map((c) => `<option value="${esc(c)}">`).join("");
   }
 
+  // Starting-list products that aren't in the list yet (matched by id or name).
+  function missingStarters() {
+    const ids = new Set(items.map((p) => p.id));
+    const names = new Set(items.map((p) => String(p.name).trim().toLowerCase()));
+    return PRODUCTS.filter((p) => !ids.has(p.id) && !names.has(p.name.toLowerCase()));
+  }
+  function renderStarterPick() {
+    const miss = missingStarters();
+    const pick = $("starterPick");
+    pick.hidden = !miss.length;
+    pick.innerHTML = '<option value="">+ Add from your list…</option>' +
+      miss.map((p) => `<option value="${esc(p.id)}">${esc(p.name)} · ${esc(cur())} ${esc(p.price)}${imgs(p).length ? ` · ${imgs(p).length} photo${imgs(p).length > 1 ? "s" : ""}` : ""}</option>`).join("");
+  }
+
   function render() {
     renderStats();
+    renderStarterPick();
     const q = query.trim().toLowerCase();
     const rows = items
       .map((p, i) => ({ p, i }))
@@ -345,6 +360,19 @@
     } finally {
       btn.disabled = false; btn.textContent = "Save changes";
     }
+  });
+
+  $("starterPick").addEventListener("change", (e) => {
+    const p = PRODUCTS.find((x) => x.id === e.target.value);
+    e.target.value = "";
+    if (!p) return;
+    items.unshift(JSON.parse(JSON.stringify(p)));
+    query = ""; $("search").value = "";
+    render();
+    const first = rowEl(0);
+    first.classList.add("is-new");
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+    toast(`${p.name} added. Check the stock, then press Save changes.`);
   });
 
   $("starterBtn").addEventListener("click", () => {
