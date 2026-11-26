@@ -20,6 +20,23 @@
     toastTimer = setTimeout(() => (t.className = "toast"), kind === "error" ? 5000 : 2600);
   }
 
+  // Big green confirmation banner (stays ~5 seconds, tap to close).
+  let savedTimer;
+  function showSaved(msg) {
+    const b = $("savedBanner");
+    $("savedText").textContent = msg;
+    b.hidden = false;
+    b.classList.remove("in"); void b.offsetWidth; b.classList.add("in");
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(() => (b.hidden = true), 5000);
+  }
+  function markRowSaved(i) {
+    const row = rowEl(i);
+    if (!row) return;
+    row.classList.add("just-saved");
+    setTimeout(() => row.classList.remove("just-saved"), 6000);
+  }
+
   async function api(path, opts = {}) {
     const res = await fetch(path, { ...opts, headers: { ...(opts.headers || {}), "x-admin-password": password } });
     let data = {};
@@ -350,7 +367,11 @@
     // Publish straight away so the photo shows on the shop without an extra step.
     if (String(p.name).trim() && items.every((x) => String(x.name).trim())) {
       const ok = await saveAll(true);
-      if (ok) toast(added > 1 ? `${added} photos uploaded and live on your shop.` : "Photo uploaded and live on your shop.");
+      if (ok) {
+        const msg = added > 1 ? `${added} photos added to ${p.name}` : `Photo added to ${p.name}`;
+        showSaved(msg);
+        markRowSaved(items.indexOf(p));
+      }
     } else {
       toast("Photo added. Give the product a name, then press Save changes.");
     }
@@ -397,7 +418,7 @@
       $("sourceNote").hidden = true;
       document.querySelectorAll(".a-item.is-new").forEach((el) => el.classList.remove("is-new"));
       updateSaveBar();
-      if (!quiet) toast("Saved. Your shop is updated.");
+      if (!quiet) showSaved("All changes saved");
       return true;
     } catch (err) {
       toast(err.message, "error");
@@ -419,6 +440,74 @@
       return;
     }
     await saveAll(false);
+  });
+
+  // ---------- flyer / starting list ----------
+  const norm = (t) => String(t || "").toLowerCase().replace(/[^a-z]/g, "");
+  function editDistance(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++)
+      for (let j = 1; j <= b.length; j++)
+        d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  // Finds the product in the current list that is the same as a flyer product
+  // (same id, same name, or a near spelling like "Gizard" for "Gizzard").
+  function findMatch(flyer, list) {
+    const n = norm(flyer.name);
+    return list.find((p) => p.id === flyer.id) ||
+      list.find((p) => norm(p.name) === n) ||
+      list.find((p) => { const m = norm(p.name); return m.length > 3 && editDistance(m, n) <= (n.length > 6 ? 2 : 1); });
+  }
+
+  // Picker: add one flyer product and publish it.
+  $("starterPick").addEventListener("change", async (e) => {
+    const p = PRODUCTS.find((x) => x.id === e.target.value);
+    e.target.value = "";
+    if (!p) return;
+    items.unshift(JSON.parse(JSON.stringify(p)));
+    query = ""; $("search").value = "";
+    render();
+    const first = rowEl(0);
+    first.classList.add("is-new");
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (items.every((x) => String(x.name).trim()) && await saveAll(true)) {
+      showSaved(`${p.name} added`);
+      markRowSaved(0);
+    }
+  });
+
+  // Switch the whole list to the flyer products, keeping stock and photos you already set.
+  $("starterBtn").addEventListener("click", async () => {
+    const used = new Set();
+    const next = PRODUCTS.map((flyer) => {
+      const mine = findMatch(flyer, items.filter((x) => !used.has(x)));
+      const copy = JSON.parse(JSON.stringify(flyer));
+      if (mine) {
+        used.add(mine);
+        copy.id = mine.id;
+        copy.stock = mine.stock;
+        if (imgs(mine).length) setImgs(copy, imgs(mine));
+      }
+      return copy;
+    });
+    const removed = items.filter((x) => !used.has(x)).map((x) => x.name);
+    const kept = [...used].map((x) => x.name);
+    const NL = String.fromCharCode(10);
+    const msg = ["Switch your shop to the flyer products?", "",
+      ...PRODUCTS.map((p) => `• ${p.name} (${cur()} ${p.price})`),
+      ...(kept.length ? ["", "Keeps your stock and photos for: " + kept.join(", ")] : []),
+      ...(removed.length ? ["", "Removes: " + removed.join(", ")] : []),
+      "", "This is saved to your shop straight away."].join(NL);
+    if (!confirm(msg)) return;
+    items = next;
+    query = ""; $("search").value = "";
+    render();
+    if (await saveAll(true)) {
+      showSaved("Your shop now shows the flyer products");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   });
 
   $("discardBtn").addEventListener("click", () => {

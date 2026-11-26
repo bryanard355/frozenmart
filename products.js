@@ -23,8 +23,10 @@ const SHOP = {
 const PRODUCTS = [
   { id: "sadia",        name: "Sadia",           category: "Chicken", unit: "", price: 21,  stock: 20, emoji: "🍗" },
   { id: "nat",          name: "Nat",             category: "Chicken", unit: "", price: 18,  stock: 20, emoji: "🍗" },
-  { id: "chk-breast",   name: "Chicken Breast",  category: "Chicken", unit: "Boneless & skinless · 2 kg pack", price: 120, stock: 20, emoji: "🍗" },
-  { id: "gizzard",      name: "Gizzard",         category: "Chicken", unit: "", price: 42,  stock: 20, emoji: "🍗" },
+  { id: "chk-breast",   name: "Chicken Breast",  category: "Chicken", unit: "Boneless & skinless · 2 kg pack", price: 120, stock: 20, emoji: "🍗",
+    images: ["photos/chk-breast.jpg"] },
+  { id: "gizzard",      name: "Gizzard",         category: "Chicken", unit: "", price: 42,  stock: 20, emoji: "🍗",
+    images: ["photos/gizzard.jpg"] },
   { id: "drumstick",    name: "Drumstick",       category: "Chicken", unit: "", price: 35,  stock: 20, emoji: "🍗",
     images: ["photos/drumstick-1.jpg", "photos/drumstick-2.jpg"] },
   { id: "layer-hard",   name: "Layer (Hard)",    category: "Chicken", unit: "", price: 42,  stock: 20, emoji: "🐔" },

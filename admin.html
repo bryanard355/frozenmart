@@ -49,7 +49,7 @@
       </div>
       <div class="a-head-btns">
         <select class="a-pick" id="starterPick" aria-label="Add a product from your list" hidden></select>
-        <button class="btn-ghost" id="starterBtn" title="Replace the whole list below with the products and prices from your flyer">Replace all with starting list</button>
+        <button class="btn-ghost" id="starterBtn" title="Show only the products and prices from your flyer">Switch to flyer products</button>
         <button class="a-btn" id="addBtn">+ Add product</button>
       </div>
     </div>
@@ -80,6 +80,11 @@
   </div>
 
   <input type="file" id="file" accept="image/*" multiple hidden>
+  <div class="saved-banner" id="savedBanner" role="status" hidden>
+    <span class="sb-tick" aria-hidden="true">✓</span>
+    <div><strong id="savedText">Saved</strong><span>Saved &amp; live on your shop. No need to press anything else.</span></div>
+    <button type="button" class="sb-x" aria-label="Close" onclick="this.parentNode.hidden=true">✕</button>
+  </div>
   <div class="toast" id="toast" role="status"></div>
 
   <script src="products.js"></script>
