@@ -190,3 +190,15 @@ body.admin .toast:not(.show) { opacity: 0; transform: translateX(-50%) translate
 }
 .a-pick:hover { background: var(--red-dark); }
 .a-pick option { color: var(--ink); background: #fff; font-weight: 500; }
+
+/* Clear upload button + drag & drop */
+.a-upload {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+  background: var(--g-800); color: #fff; border: 0; border-radius: 8px; padding: 8px 6px;
+  font-size: 12.5px; font-weight: 700; white-space: nowrap;
+}
+.a-upload:hover { background: var(--g-700); }
+.a-upload svg { width: 16px; height: 16px; flex: none; }
+.a-item.drop { border-color: var(--g-600); border-style: dashed; background: var(--g-50); }
+.a-item.drop .a-thumb { outline: 3px dashed var(--g-600); outline-offset: 3px; }
+.a-item.uploading .a-upload { opacity: .6; pointer-events: none; }

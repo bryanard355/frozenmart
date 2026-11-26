@@ -132,9 +132,11 @@
                 <button type="button" data-act="cover" data-n="${n}" title="${n === 0 ? "Cover photo" : "Make this the cover photo"}"><img src="${esc(src)}" alt=""></button>
                 <button type="button" class="a-mini-x" data-act="rmphoto" data-n="${n}" aria-label="Remove photo ${n + 1}">×</button>
               </span>`).join("")}
-            ${imgs(p).length < 8 ? '<button type="button" class="a-mini-add" data-act="photo" aria-label="Add another photo">+</button>' : ""}
           </div>
           <span class="a-photo-hint">${imgs(p).length > 1 ? "Tap a photo to make it the cover" : ""}</span>` : ""}
+          ${imgs(p).length < 8 ? `<button type="button" class="a-upload" data-act="photo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            Add photo</button>` : ""}
         </div>
         <div class="a-fields">
           <label class="f-name">Product name
@@ -308,39 +310,81 @@
     );
   }
 
-  $("file").addEventListener("change", async () => {
-    const file = $("file").files[0];
-    $("file").value = "";
-    const i = photoFor; photoFor = null;
-    if (!file || i == null || !items[i]) return;
+  // Prepares a photo for upload: shrinks it if the browser can read it, otherwise
+  // sends the original when it's already a web format (JPG/PNG/WebP).
+  async function preparePhoto(file) {
+    try {
+      return { blob: await shrinkPhoto(file), type: "image/jpeg" };
+    } catch (err) {
+      if (/^image\/(jpeg|png|webp)$/.test(file.type) && file.size <= 4 * 1024 * 1024) return { blob: file, type: file.type };
+      throw new Error(`"${file.name}" can't be used. Please choose a JPG or PNG photo (on iPhone: Settings → Camera → Formats → Most Compatible, or send yourself a screenshot).`);
+    }
+  }
+
+  async function uploadPhotos(i, files) {
+    const p = items[i];
+    if (!p || !files.length) return;
+    const room = 8 - imgs(p).length;
+    if (room <= 0) { toast("This product already has 8 photos. Remove one first.", "error"); return; }
+    files = files.filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name)).slice(0, room);
+    if (!files.length) { toast("Please choose a photo file.", "error"); return; }
     const row = rowEl(i);
     row && row.classList.add("uploading");
-    try {
-      const blob = await shrinkPhoto(file);
-      const data = await api(`/api/admin/upload?id=${encodeURIComponent(items[i].id)}`, {
-        method: "POST", headers: { "content-type": "image/jpeg" }, body: blob,
-      });
-      setImgs(items[i], [...imgs(items[i]), data.url].slice(0, 8));
-      rerenderRow(i);
-      toast("Photo added. Press Save changes to publish it.");
-    } catch (err) {
-      row && row.classList.remove("uploading");
-      toast(err.message, "error");
-      if (err.status === 401) logout();
+    let added = 0;
+    for (const [n, file] of files.entries()) {
+      try {
+        if (files.length > 1) toast(`Uploading photo ${n + 1} of ${files.length}…`);
+        const { blob, type } = await preparePhoto(file);
+        const data = await api(`/api/admin/upload?id=${encodeURIComponent(p.id)}`, {
+          method: "POST", headers: { "content-type": type }, body: blob,
+        });
+        setImgs(p, [...imgs(p), data.url].slice(0, 8));
+        added++;
+      } catch (err) {
+        toast(err.message, "error");
+        if (err.status === 401) { logout(); return; }
+      }
     }
+    rerenderRow(items.indexOf(p));
+    if (!added) return;
+    // Publish straight away so the photo shows on the shop without an extra step.
+    if (String(p.name).trim() && items.every((x) => String(x.name).trim())) {
+      const ok = await saveAll(true);
+      if (ok) toast(added > 1 ? `${added} photos uploaded and live on your shop.` : "Photo uploaded and live on your shop.");
+    } else {
+      toast("Photo added. Give the product a name, then press Save changes.");
+    }
+  }
+
+  $("file").addEventListener("change", () => {
+    const files = [...$("file").files];
+    $("file").value = "";
+    const i = photoFor; photoFor = null;
+    if (i != null) uploadPhotos(i, files);
+  });
+
+  // Drag & drop photos onto a product (computer).
+  $("list").addEventListener("dragover", (e) => {
+    const row = e.target.closest(".a-item");
+    if (!row || !e.dataTransfer || ![...e.dataTransfer.types].includes("Files")) return;
+    e.preventDefault();
+    document.querySelectorAll(".a-item.drop").forEach((el) => el !== row && el.classList.remove("drop"));
+    row.classList.add("drop");
+  });
+  $("list").addEventListener("dragleave", (e) => {
+    const row = e.target.closest(".a-item");
+    if (row && !row.contains(e.relatedTarget)) row.classList.remove("drop");
+  });
+  $("list").addEventListener("drop", (e) => {
+    const row = e.target.closest(".a-item");
+    if (!row) return;
+    e.preventDefault();
+    row.classList.remove("drop");
+    uploadPhotos(Number(row.dataset.i), [...e.dataTransfer.files]);
   });
 
   // ---------- save ----------
-  $("saveBtn").addEventListener("click", async () => {
-    const unnamed = items.findIndex((p) => !String(p.name).trim());
-    if (unnamed !== -1) {
-      query = ""; $("search").value = ""; render();
-      const el = rowEl(unnamed);
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.querySelector('[data-f="name"]').focus({ preventScroll: true });
-      toast("Every product needs a name before saving.", "error");
-      return;
-    }
+  async function saveAll(quiet) {
     const btn = $("saveBtn");
     btn.disabled = true; btn.textContent = "Saving…";
     try {
@@ -353,40 +397,28 @@
       $("sourceNote").hidden = true;
       document.querySelectorAll(".a-item.is-new").forEach((el) => el.classList.remove("is-new"));
       updateSaveBar();
-      toast("Saved. Your shop is updated.");
+      if (!quiet) toast("Saved. Your shop is updated.");
+      return true;
     } catch (err) {
       toast(err.message, "error");
       if (err.status === 401) logout();
+      return false;
     } finally {
       btn.disabled = false; btn.textContent = "Save changes";
     }
-  });
+  }
 
-  $("starterPick").addEventListener("change", (e) => {
-    const p = PRODUCTS.find((x) => x.id === e.target.value);
-    e.target.value = "";
-    if (!p) return;
-    items.unshift(JSON.parse(JSON.stringify(p)));
-    query = ""; $("search").value = "";
-    render();
-    const first = rowEl(0);
-    first.classList.add("is-new");
-    first.scrollIntoView({ behavior: "smooth", block: "center" });
-    toast(`${p.name} added. Check the stock, then press Save changes.`);
-  });
-
-  $("starterBtn").addEventListener("click", () => {
-    if (!confirm("Replace the list below with your starting products and prices (Sadia, Nat, Chicken Breast…)? Nothing changes on the shop until you press Save changes.")) return;
-    // Keep photos already uploaded for products that are still in the list.
-    const photos = Object.fromEntries(items.filter((p) => imgs(p).length).map((p) => [p.id, imgs(p)]));
-    items = PRODUCTS.map((p) => {
-      const copy = { ...p };
-      if (photos[p.id] && !imgs(p).length) setImgs(copy, photos[p.id]);
-      return copy;
-    });
-    query = ""; $("search").value = "";
-    render();
-    toast("Starting list loaded. Check stock numbers, then press Save changes.");
+  $("saveBtn").addEventListener("click", async () => {
+    const unnamed = items.findIndex((p) => !String(p.name).trim());
+    if (unnamed !== -1) {
+      query = ""; $("search").value = ""; render();
+      const el = rowEl(unnamed);
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.querySelector('[data-f="name"]').focus({ preventScroll: true });
+      toast("Every product needs a name before saving.", "error");
+      return;
+    }
+    await saveAll(false);
   });
 
   $("discardBtn").addEventListener("click", () => {
