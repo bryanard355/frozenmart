@@ -35,7 +35,7 @@ export async function POST(request) {
   // Tidy up: delete uploaded photos no product uses any more (older than 1 hour, so
   // photos uploaded but not yet saved are never removed).
   try {
-    const used = new Set(products.map((p) => photoPath(p.image)).filter(Boolean));
+    const used = new Set(products.flatMap((p) => (p.images || []).map(photoPath)).filter(Boolean));
     const { blobs } = await list({ prefix: "photos/", limit: 1000 });
     const hourAgo = Date.now() - 60 * 60 * 1000;
     const unused = blobs

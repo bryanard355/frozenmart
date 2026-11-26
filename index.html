@@ -230,6 +230,31 @@
     </div>
   </div>
 
+  <!-- Product details + photo gallery -->
+  <div class="pd-modal" id="pdModal" hidden role="dialog" aria-modal="true" aria-labelledby="pdName">
+    <div class="pd-card">
+      <button class="icon-btn pd-x" id="pdClose" aria-label="Close">✕</button>
+      <div class="pd-gallery">
+        <div class="pd-track" id="pdTrack"></div>
+        <button class="pd-nav prev" id="pdPrev" aria-label="Previous photo">‹</button>
+        <button class="pd-nav next" id="pdNext" aria-label="Next photo">›</button>
+        <div class="pd-dots" id="pdDots"></div>
+      </div>
+      <div class="pd-info">
+        <div class="pd-thumbs" id="pdThumbs"></div>
+        <span class="card-cat" id="pdCat"></span>
+        <h2 class="pd-name" id="pdName"></h2>
+        <p class="pd-unit" id="pdUnit"></p>
+        <div class="pd-buy">
+          <span class="price" id="pdPrice"></span>
+          <span class="badge" id="pdStock"></span>
+        </div>
+        <button class="add pd-add" id="pdAdd">Add to cart</button>
+        <p class="pd-note">Free delivery on every order</p>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status"></div>
 
   <script src="products.js"></script>

@@ -33,9 +33,15 @@
   const PHOTO_EXTS = ["jpg", "jpeg", "png", "webp"];
   // Bump this when photos change so browsers fetch fresh copies instead of old saved ones.
   const PHOTO_V = "?v=2";
+  // All photos of a product (first one is the cover).
+  function productImages(p) {
+    if (Array.isArray(p.images) && p.images.length) return p.images.filter(Boolean);
+    return p.image ? [p.image] : [];
+  }
   function photoHtml(p) {
-    const first = p.image ? p.image : `photos/${p.id}.${PHOTO_EXTS[0]}${PHOTO_V}`;
-    const tries = p.image ? "" : PHOTO_EXTS.slice(1).join(",");
+    const cover = productImages(p)[0];
+    const first = cover ? cover : `photos/${p.id}.${PHOTO_EXTS[0]}${PHOTO_V}`;
+    const tries = cover ? "" : PHOTO_EXTS.slice(1).join(",");
     return `<span class="ph-emoji" aria-hidden="true">${p.emoji || "🧊"}</span>` +
       `<img class="ph-img" src="${escapeHtml(first)}" alt="${escapeHtml(p.name)}" loading="lazy" ` +
       `data-id="${escapeHtml(p.id)}" data-tries="${tries}" onerror="nextPhoto(this)">`;
@@ -114,12 +120,17 @@
       const s = stockState(p);
       const inCart = cart[p.id] || 0;
       const thumb = photoHtml(p);
+      const count = productImages(p).length;
+      const id = escapeHtml(p.id);
       return `
         <article class="card ${s.cls === "out" ? "soldout" : ""}">
-          <div class="thumb">${thumb}<span class="badge ${s.cls}">${s.label}</span></div>
+          <button type="button" class="thumb" data-open="${id}" aria-label="View ${escapeHtml(p.name)}${count > 1 ? ` (${count} photos)` : ""}">
+            ${thumb}<span class="badge ${s.cls}">${s.label}</span>
+            ${count > 1 ? `<span class="ph-count"><svg viewBox="0 0 24 24"><path d="M4 7h3l2-2h6l2 2h3v12H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>${count}</span>` : ""}
+          </button>
           <div class="card-body">
             <div class="card-cat">${escapeHtml(p.category)}</div>
-            <div class="card-name">${escapeHtml(p.name)}</div>
+            <button type="button" class="card-name" data-open="${id}">${escapeHtml(p.name)}</button>
             <div class="card-unit">${escapeHtml(p.unit)}</div>
             <div class="card-foot">
               <span class="price">${money(p.price)}</span>
@@ -132,10 +143,97 @@
     }).join("");
   }
   $("products").addEventListener("click", (e) => {
+    const opener = e.target.closest("[data-open]");
+    if (opener) { openProduct(opener.dataset.open); return; }
     const btn = e.target.closest(".add");
     if (!btn || btn.disabled) return;
     changeQty(btn.dataset.id, 1);
     toast("Added " + findProduct(btn.dataset.id).name);
+  });
+
+  // ---------- product details + photo gallery ----------
+  let pdId = null;
+  function openProduct(id) {
+    const p = findProduct(id);
+    if (!p) return;
+    pdId = id;
+    const imgs = productImages(p);
+    const slides = imgs.length
+      ? imgs.map((src, i) => `<div class="pd-slide"><img src="${escapeHtml(src)}" alt="${escapeHtml(p.name)} photo ${i + 1}" onerror="this.remove()"><span class="ph-emoji" aria-hidden="true">${p.emoji || "🧊"}</span></div>`)
+      : [`<div class="pd-slide">${photoHtml(p)}</div>`];
+    $("pdTrack").innerHTML = slides.join("");
+    $("pdTrack").scrollLeft = 0;
+    const multi = slides.length > 1;
+    $("pdPrev").hidden = $("pdNext").hidden = !multi;
+    $("pdDots").innerHTML = multi ? slides.map((_, i) => `<button type="button" aria-label="Photo ${i + 1}" data-go="${i}"></button>`).join("") : "";
+    $("pdThumbs").innerHTML = multi
+      ? imgs.map((src, i) => `<button type="button" data-go="${i}" aria-label="Show photo ${i + 1}"><img src="${escapeHtml(src)}" alt=""></button>`).join("")
+      : "";
+    $("pdCat").textContent = p.category;
+    $("pdName").textContent = p.name;
+    $("pdUnit").textContent = p.unit || "";
+    $("pdUnit").hidden = !p.unit;
+    $("pdPrice").textContent = money(p.price);
+    updateProductModal();
+    setSlideMarker(0);
+    $("pdModal").hidden = false;
+    document.body.classList.add("modal-open");
+    $("pdClose").focus({ preventScroll: true });
+  }
+  function updateProductModal() {
+    const p = findProduct(pdId);
+    if (!p) return;
+    const s = stockState(p);
+    const inCart = cart[p.id] || 0;
+    $("pdStock").className = "badge " + s.cls;
+    $("pdStock").textContent = s.label;
+    const btn = $("pdAdd");
+    btn.disabled = s.cls === "out" || inCart >= p.stock;
+    btn.textContent = s.cls === "out" ? "Sold out" : inCart ? `Add another (${inCart} in cart)` : "Add to cart";
+  }
+  function closeProduct() {
+    $("pdModal").hidden = true;
+    document.body.classList.remove("modal-open");
+    pdId = null;
+  }
+  function slideIndex() {
+    const t = $("pdTrack");
+    return Math.round(t.scrollLeft / Math.max(1, t.clientWidth));
+  }
+  function goToSlide(i) {
+    const t = $("pdTrack");
+    const n = t.children.length;
+    i = (i + n) % n;
+    t.scrollTo({ left: i * t.clientWidth, behavior: "smooth" });
+    setSlideMarker(i);
+  }
+  function setSlideMarker(i) {
+    $("pdDots").querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
+    $("pdThumbs").querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
+  }
+  $("pdTrack").addEventListener("scroll", () => {
+    clearTimeout($("pdTrack")._t);
+    $("pdTrack")._t = setTimeout(() => setSlideMarker(slideIndex()), 60);
+  });
+  $("pdPrev").addEventListener("click", () => goToSlide(slideIndex() - 1));
+  $("pdNext").addEventListener("click", () => goToSlide(slideIndex() + 1));
+  $("pdModal").addEventListener("click", (e) => {
+    const go = e.target.closest("[data-go]");
+    if (go) { goToSlide(Number(go.dataset.go)); return; }
+    if (e.target.id === "pdModal") closeProduct();
+  });
+  $("pdClose").addEventListener("click", closeProduct);
+  $("pdAdd").addEventListener("click", () => {
+    if (!pdId) return;
+    changeQty(pdId, 1);
+    toast("Added " + findProduct(pdId).name);
+    updateProductModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if ($("pdModal").hidden) return;
+    if (e.key === "Escape") closeProduct();
+    if (e.key === "ArrowRight") goToSlide(slideIndex() + 1);
+    if (e.key === "ArrowLeft") goToSlide(slideIndex() - 1);
   });
   $("search").addEventListener("input", renderProducts);
   $("inStockOnly").addEventListener("change", renderProducts);

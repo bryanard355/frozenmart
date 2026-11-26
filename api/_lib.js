@@ -112,8 +112,13 @@ export function cleanProducts(input) {
     if (!Number.isFinite(price) || price < 0 || price > 1e7) throw new Error(`${label} has an invalid price.`);
     const stock = Math.floor(Number(p.stock));
     if (!Number.isFinite(stock) || stock < 0 || stock > 1e7) throw new Error(`${label} has an invalid stock number.`);
-    const image = text(p.image, 600);
-    if (image && !BLOB_URL_RE.test(image) && !LOCAL_PHOTO_RE.test(image) && !PRIVATE_PHOTO_RE.test(image)) throw new Error(`${label} has an invalid photo link.`);
+    // Photos: "images" (list, first = cover). Older saves used a single "image".
+    const rawImages = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+    if (rawImages.length > 8) throw new Error(`${label} has too many photos (8 max).`);
+    const images = [...new Set(rawImages.map((v) => text(v, 600)).filter(Boolean))];
+    for (const img of images) {
+      if (!BLOB_URL_RE.test(img) && !LOCAL_PHOTO_RE.test(img) && !PRIVATE_PHOTO_RE.test(img)) throw new Error(`${label} has an invalid photo link.`);
+    }
     const out = {
       id,
       name,
@@ -123,7 +128,10 @@ export function cleanProducts(input) {
       stock,
       emoji: text(p.emoji, 4) || "🧊",
     };
-    if (image) out.image = image;
+    if (images.length) {
+      out.images = images;
+      out.image = images[0]; // kept for older pages
+    }
     return out;
   });
 }

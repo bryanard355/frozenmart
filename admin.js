@@ -102,8 +102,17 @@
     return { cls: "ok", label: "In stock" };
   }
 
+  // All photos of a product (first = cover). Older saves used a single "image".
+  function imgs(p) {
+    if (Array.isArray(p.images) && p.images.length) return p.images.slice();
+    return p.image ? [p.image] : [];
+  }
+  function setImgs(p, list) {
+    if (list.length) { p.images = list; p.image = list[0]; }
+    else { delete p.images; delete p.image; }
+  }
   function thumbHtml(p) {
-    const src = p.image || `photos/${p.id}.jpg?v=2`;
+    const src = imgs(p)[0] || `photos/${p.id}.jpg?v=2`;
     return `<span class="a-emoji">${esc(p.emoji || "🧊")}</span><img src="${esc(src)}" alt="" onerror="this.remove()">`;
   }
 
@@ -112,12 +121,20 @@
     return `
       <article class="a-item ${s.cls === "out" ? "is-out" : ""}" data-i="${i}">
         <div class="a-photo">
-          <button type="button" class="a-thumb" data-act="photo" aria-label="Change photo for ${esc(p.name || "new product")}">
+          <button type="button" class="a-thumb" data-act="photo" aria-label="Add a photo for ${esc(p.name || "new product")}">
             ${thumbHtml(p)}
-            <span class="a-thumb-label">Change photo</span>
+            <span class="a-thumb-label">${imgs(p).length ? "+ Add photo" : "Add photo"}</span>
             <span class="a-spinner"></span>
           </button>
-          ${p.image ? '<button type="button" class="link" data-act="rmphoto">Remove photo</button>' : ""}
+          ${imgs(p).length ? `<div class="a-gallery">
+            ${imgs(p).map((src, n) => `
+              <span class="a-mini ${n === 0 ? "is-cover" : ""}">
+                <button type="button" data-act="cover" data-n="${n}" title="${n === 0 ? "Cover photo" : "Make this the cover photo"}"><img src="${esc(src)}" alt=""></button>
+                <button type="button" class="a-mini-x" data-act="rmphoto" data-n="${n}" aria-label="Remove photo ${n + 1}">×</button>
+              </span>`).join("")}
+            ${imgs(p).length < 8 ? '<button type="button" class="a-mini-add" data-act="photo" aria-label="Add another photo">+</button>' : ""}
+          </div>
+          <span class="a-photo-hint">${imgs(p).length > 1 ? "Tap a photo to make it the cover" : ""}</span>` : ""}
         </div>
         <div class="a-fields">
           <label class="f-name">Product name
@@ -221,7 +238,12 @@
       case "inc": p.stock = (Number(p.stock) || 0) + 1; rerenderRow(i); break;
       case "dec": p.stock = Math.max(0, (Number(p.stock) || 0) - 1); rerenderRow(i); break;
       case "soldout": p.stock = 0; rerenderRow(i); break;
-      case "rmphoto": delete p.image; rerenderRow(i); break;
+      case "rmphoto": {
+        const list = imgs(p); list.splice(Number(btn.dataset.n), 1); setImgs(p, list); rerenderRow(i); break;
+      }
+      case "cover": {
+        const list = imgs(p); const [pick] = list.splice(Number(btn.dataset.n), 1); list.unshift(pick); setImgs(p, list); rerenderRow(i); break;
+      }
       case "delete":
         if (confirm(`Delete "${p.name || "this product"}"? It will be removed from the shop when you save.`)) {
           items.splice(i, 1); render();
@@ -283,9 +305,9 @@
       const data = await api(`/api/admin/upload?id=${encodeURIComponent(items[i].id)}`, {
         method: "POST", headers: { "content-type": "image/jpeg" }, body: blob,
       });
-      items[i].image = data.url;
+      setImgs(items[i], [...imgs(items[i]), data.url].slice(0, 8));
       rerenderRow(i);
-      toast("Photo uploaded. Press Save changes to publish it.");
+      toast("Photo added. Press Save changes to publish it.");
     } catch (err) {
       row && row.classList.remove("uploading");
       toast(err.message, "error");
@@ -328,8 +350,12 @@
   $("starterBtn").addEventListener("click", () => {
     if (!confirm("Replace the list below with your starting products and prices (Sadia, Nat, Chicken Breast…)? Nothing changes on the shop until you press Save changes.")) return;
     // Keep photos already uploaded for products that are still in the list.
-    const photos = Object.fromEntries(items.filter((p) => p.image).map((p) => [p.id, p.image]));
-    items = PRODUCTS.map((p) => ({ ...p, ...(photos[p.id] && !p.image ? { image: photos[p.id] } : {}) }));
+    const photos = Object.fromEntries(items.filter((p) => imgs(p).length).map((p) => [p.id, imgs(p)]));
+    items = PRODUCTS.map((p) => {
+      const copy = { ...p };
+      if (photos[p.id] && !imgs(p).length) setImgs(copy, photos[p.id]);
+      return copy;
+    });
     query = ""; $("search").value = "";
     render();
     toast("Starting list loaded. Check stock numbers, then press Save changes.");
