@@ -469,7 +469,8 @@
       if (!res.ok) return;
       const data = await res.json();
       if (Array.isArray(data.products) && data.products.length) {
-        PRODUCTS.splice(0, PRODUCTS.length, ...data.products);
+        PRODUCTS.splice(0, PRODUCTS.length, ...data.products.map((p) =>
+          p.category === "Vegetables & Sides" ? { ...p, category: "Sides" } : p));
       }
     } catch (e) { /* use products.js */ }
   }

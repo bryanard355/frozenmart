@@ -98,7 +98,8 @@
       if (Array.isArray(data.products) && data.products.length) live = data.products;
     } catch (e) {}
 
-    items = (live || PRODUCTS).map((p) => ({ ...p }));
+    // "Vegetables & Sides" is now just "Sides" (saved with the next save).
+    items = (live || PRODUCTS).map((p) => ({ ...p, category: p.category === "Vegetables & Sides" ? "Sides" : p.category }));
     // Starting list isn't live yet, so mark it unsaved to prompt the first save.
     savedJson = live ? JSON.stringify(items) : "";
     $("sourceNote").hidden = !!live;
